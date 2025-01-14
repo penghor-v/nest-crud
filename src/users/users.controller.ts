@@ -35,7 +35,7 @@ export class UsersController {
   @Get()
   @ApiOperation({ summary: 'Get all users (Admin only)' })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, description: 'List of users', type: [User] }) // Array of users
+  @ApiResponse({ status: 200, description: 'List of users', type: [User] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async findAll(@Res() res) {

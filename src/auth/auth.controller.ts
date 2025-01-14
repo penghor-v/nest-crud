@@ -7,6 +7,7 @@ import {
   Get,
   Res,
   HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from 'src/jwt-auth/jwt-auth.guard';
@@ -22,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { User } from 'src/schemas/user.schema';
 import { LoginResponseDto } from 'src/users/dto/login-response.dto.';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -93,5 +95,26 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('refresh')
+  @HttpCode(200)
+  async refresh(@Request() req, @Res() res) {
+    try {
+      const user = req.user;
+      const tokens = await this.authService.refreshTokens(
+        user.userId,
+        user.refreshToken,
+      );
+      res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true });
+
+      return res.json({ accessToken: tokens.accessToken });
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: 'Refresh failed' });
+    }
   }
 }

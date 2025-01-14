@@ -54,4 +54,26 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
   }
+
+  async updateRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<User> {
+    try {
+      const updatedUser = await this.userModel.findByIdAndUpdate(
+        userId,
+        { hashedRefreshToken: refreshToken },
+        { new: true },
+      );
+
+      if (!updatedUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating refresh token:', error);
+      throw error;
+    }
+  }
 }
